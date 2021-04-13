@@ -1,0 +1,94 @@
+version: "3"
+services:
+
+  proxy:
+    image: rendybomber/proxy-custom:v1
+    networks:
+      - ext_net
+      - proxy_net
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: always
+    ports:
+      - '80:80'
+    volumes:
+      - data-proxy:/etc/nginx/conf.d/
+
+  web:
+    image: rendybomber/web-custom:v1
+    networks:
+      - proxy_net
+      - int_net
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: always
+    volumes:
+      - data_web:/var/www/html
+    
+  pma:
+    image: rendybomber/pma-custom:v1
+    networks:
+      - proxy_net
+      - int_net
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: always
+    environment:
+      PMA_HOST: db
+    volumes:
+      - data_pma:/etc/phpmyadmin
+    
+  db:
+    image: rendybomber/mysql-custom:v1
+    networks:
+      - int_net
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: always
+    secret:
+      - sql-rootpassword
+      - sql-user
+      - sql-pasword
+    environment:
+      MYSQL_ROOT_PASSWORD: /run/secrets/sql_rootpassword
+      MYSQL_DATABASE: dbkuasai
+      MYSQL_USER: /run/secrets/sql_user
+      MYSQL_PASSWORD: /run/secrets/sql_password
+    volumes:
+      - data_mysql:/var/lib/mysql
+      
+network:
+  ext_net:
+  proxy_net:
+  int_net:
+  
+secrets:
+  sql_user:
+    file: ./sql-rootpassword.txt
+  sql_user:
+    file: ./sql-user.txt
+  sql_password:
+    file: ./sql-password.txt      
+      
+volumes:
+  data-proxy:
+  data-web:
+  data-mysql:
+  data-pma:
+      

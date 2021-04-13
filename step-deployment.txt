@@ -1,0 +1,11 @@
+1. Create 3 VM Instance di gcp
+2. Setting public key supaya bisa diakses dari ssh eksternal (putty)
+3. Promote Node 1 sebagai Manager, docker swarm init
+4. Promote Node 2 dan Node 3 sebagai manager. 
+5. build docker images untuk web, db, proxy, dan pma
+6. setting hostname di file hosts laptop/komputer
+7. run docker compose untuk test versi development 
+8. Build service load balancer di GCP
+9. Setting Domain ke dns GCP
+10. run docker stack untuk test versi production 
+

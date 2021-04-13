@@ -1,0 +1,56 @@
+version: "3"
+services:
+
+  proxy:
+    image: rendybomber/proxy-custom:v1
+    networks:
+      - ext_net
+      - proxy_net
+    ports:
+      - '80:80'
+    volumes:
+      - data_proxy:/etc/nginx/conf.d/
+
+  web:
+    image: rendybomber/web-custom:v1
+    networks:
+      - proxy_net
+      - int_net
+    volumes:
+      - data_web:/var/www/html
+    depends_on:
+      - db
+    
+  pma:
+    image: rendybomber/pma-custom:v1
+    networks:
+      - proxy_net
+      - int_net
+    environment:
+      PMA_HOST: db
+    volumes:
+      - data_pma:/etc/phpmyadmin
+    
+  db:
+    image: rendybomber/mysql-custom:v1
+    networks:
+      - int_net
+    environment:
+      MYSQL_ROOT_PASSWORD: P@ssw0rd
+      MYSQL_DATABASE: dbkuasai
+      MYSQL_USER: kuasaiuser
+      MYSQL_PASSWORD: P@ssw0rd
+    volumes:
+      - data_mysql:/var/lib/mysql
+      
+networks:
+  ext_net:
+  proxy_net:
+  int_net:
+  
+      
+volumes:
+  data_proxy:
+  data_web:
+  data_mysql:
+  data_pma:
